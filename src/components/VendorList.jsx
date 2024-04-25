@@ -3,17 +3,7 @@ import React, { useState, useEffect } from "react";
 import VendorCard from "./VendorCard";
 import styled from "styled-components";
 
-// const VendorListContainer = styled.div`
-//   display: grid;
-//   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-//   gap: 20px;
-// `;
-
-// const Loader = styled.div`
-//   text-align: center;
-//   margin: 20px;
-// `;
-
+// Styled components for VendorListContainer and Loader
 const VendorListContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(300px, 1fr));
@@ -27,32 +17,23 @@ const Loader = styled.div`
 `;
 
 const VendorList = () => {
-  const [vendors, setVendors] = useState([
-    {
-      vendor_name: "DJ FunkyKong",
-      vendor_type: "Musician",
-      vendor_price: 40,
-      vendor_rating: 5,
-    },
-  ]);
+  // State for vendors, loading status, and page number
+  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [pageNumber, setPageNumber] = useState(1);
 
-
-
+  // Function to fetch vendors from the API
   const fetchVendors = async () => {
     fetch(`http://localhost:8080/vendors?page=${pageNumber}`)
       .then((response) => {
-        console.log(`fetch Number ${pageNumber}` )
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
-        console.log(data);
-        setVendors(data.rows);
+        // Update vendors state with fetched data
+        setVendors((prevVendors) => [...prevVendors, ...data.rows]);
         setLoading(false);
         setPageNumber((prevPageNumber) => prevPageNumber + 1);
       })
@@ -61,32 +42,37 @@ const VendorList = () => {
       });
   };
 
+  // Function to handle scroll event
+  const handleScroll = () => {
+    if (
+      document.documentElement.scrollHeight -
+        (window.innerHeight + document.documentElement.scrollTop) <
+      10
+    ) {
+      fetchVendors();
+    }
+  };
 
+  // useEffect to fetch vendors on initial render
   useEffect(() => {
-    fetchVendors()
-      
-    return () => {
-      fetchVendors()
-    };
-  }, []);
+    fetchVendors();
 
-  useEffect(() => {
-    // Fetch vendors from API
-    
-    const handleScroll = () => {
-      if (
-        document.documentElement.scrollHeight - 
-        (window.innerHeight + document.documentElement.scrollTop) < 10
-      ) {
-        fetchVendors();
-      }
-    };
-    document.addEventListener("scroll", handleScroll);
-  
     return () => {
+      // Cleanup function to prevent memory leaks
       document.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // useEffect for infinite scrolling
+  useEffect(() => {
+    // Add event listener for scroll
+    document.addEventListener("scroll", handleScroll);
+
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, [vendors]); // Run effect when vendors state changes
 
   return (
     <div>
