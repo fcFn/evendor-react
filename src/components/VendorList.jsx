@@ -3,10 +3,22 @@ import React, { useState, useEffect } from "react";
 import VendorCard from "./VendorCard";
 import styled from "styled-components";
 
+// const VendorListContainer = styled.div`
+//   display: grid;
+//   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+//   gap: 20px;
+// `;
+
+// const Loader = styled.div`
+//   text-align: center;
+//   margin: 20px;
+// `;
+
 const VendorListContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
   gap: 20px;
+  grid-auto-rows: 2fr;
 `;
 
 const Loader = styled.div`
@@ -25,19 +37,12 @@ const VendorList = () => {
   ]);
   const [loading, setLoading] = useState(true);
 
+  const [pageNumber, setPageNumber] = useState(1);
+
   useEffect(() => {
     // Fetch vendors from API
-    const fetchVendors = () => {
-      //   try {
-      //     const response = await fetch('/api/vendors');
-      //     const data = await response.json();
-      //     setVendors(data);
-      //     setLoading(false);
-      //   } catch (error) {
-      //     console.error('Error fetching vendors:', error);
-      //   }
-
-      fetch("http://localhost:5432/vendors")
+    const fetchVendors = async () => {
+      fetch("http://localhost:8080/vendors?page=${pageNumber}")
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -45,15 +50,30 @@ const VendorList = () => {
           return response.json();
         })
         .then((data) => {
-          setVendors(data);
+          console.log(data);
+          setVendors(data.rows);
           setLoading(false);
+          setPageNumber((prevPageNumber) => prevPageNumber + 1);
         })
         .catch((error) => {
           console.error("Fetch request failed:", error);
         });
     };
 
-    fetchVendors();
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop ===
+        document.documentElement.offsetHeight
+      ) {
+        fetchVendors();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (

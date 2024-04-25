@@ -2,7 +2,6 @@
 import React from 'react';
 import EventFilter from './components/Filter';
 import VendorList from './components/VendorList';
-import InfiniteScroll from './components/Search';
 
 function App() {
   return (
@@ -10,9 +9,7 @@ function App() {
       <h1>EVENDOR</h1>
       <EventFilter />
       <VendorList />
-      <InfiniteScroll>
-        
-      </InfiniteScroll>
+
     </div>
   );
 }
