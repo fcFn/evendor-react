@@ -39,40 +39,52 @@ const VendorList = () => {
 
   const [pageNumber, setPageNumber] = useState(1);
 
+
+
+  const fetchVendors = async () => {
+    fetch(`http://localhost:8080/vendors?page=${pageNumber}`)
+      .then((response) => {
+        console.log(`fetch Number ${pageNumber}` )
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setVendors(data.rows);
+        setLoading(false);
+        setPageNumber((prevPageNumber) => prevPageNumber + 1);
+      })
+      .catch((error) => {
+        console.error("Fetch request failed:", error);
+      });
+  };
+
+
+  useEffect(() => {
+    fetchVendors()
+      
+    return () => {
+      fetchVendors()
+    };
+  }, []);
+
   useEffect(() => {
     // Fetch vendors from API
-    const fetchVendors = async () => {
-      fetch("http://localhost:8080/vendors?page=${pageNumber}")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data);
-          setVendors(data.rows);
-          setLoading(false);
-          setPageNumber((prevPageNumber) => prevPageNumber + 1);
-        })
-        .catch((error) => {
-          console.error("Fetch request failed:", error);
-        });
-    };
-
+    
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop ===
-        document.documentElement.offsetHeight
+        document.documentElement.scrollHeight - 
+        (window.innerHeight + document.documentElement.scrollTop) < 10
       ) {
         fetchVendors();
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
-
+    document.addEventListener("scroll", handleScroll);
+  
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
