@@ -21,35 +21,43 @@ const VendorList = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
+  const [reachedEnd, setReachedEnd] = useState(false);
 
   // Function to fetch vendors from the API
   const fetchVendors = async () => {
-    fetch(`http://localhost:8080/vendors?page=${pageNumber}`)
-      .then((response) => {
+    if (!reachedEnd) {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:8080/vendors?page=${pageNumber}`
+        );
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json();
-      })
-      .then((data) => {
-        // Update vendors state with fetched data
-        setVendors((prevVendors) => [...prevVendors, ...data.rows]);
+        const data = await response.json();
+        if (data.rows.length === 0) {
+          setReachedEnd(true); // If no more vendors to load, set reachedEnd to true
+        } else {
+          setVendors(prevVendors => [...prevVendors, ...data.rows]); // Update vendors state with fetched data
+          setPageNumber(pageNumber + 1); // Increment page number by 1
+        }
         setLoading(false);
-        setPageNumber((prevPageNumber) => prevPageNumber + 1);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Fetch request failed:", error);
-      });
+        setLoading(false);
+      }
+    }
   };
 
   // Function to handle scroll event
   const handleScroll = () => {
     if (
-      document.documentElement.scrollHeight -
-        (window.innerHeight + document.documentElement.scrollTop) <
-      10
+      window.innerHeight + document.documentElement.scrollTop ===
+        document.documentElement.offsetHeight &&
+      !loading &&
+      !reachedEnd
     ) {
-      fetchVendors();
+      fetchVendors(); // Fetch more vendors if scroll reaches the bottom
     }
   };
 
@@ -57,35 +65,39 @@ const VendorList = () => {
   useEffect(() => {
     fetchVendors();
 
+    // Cleanup function to prevent memory leaks
     return () => {
-      // Cleanup function to prevent memory leaks
       document.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, []); // Empty dependency array to run once on mount
 
   // useEffect for infinite scrolling
   useEffect(() => {
     // Add event listener for scroll
-    document.addEventListener("scroll", handleScroll);
+    document.addEventListener("scroll", handleScroll, { passive: true });
 
     // Cleanup function to remove event listener
     return () => {
       document.removeEventListener("scroll", handleScroll);
     };
-  }, [vendors]); // Run effect when vendors state changes
+  }, [handleScroll]); // Include handleScroll in the dependency array
 
   return (
     <div>
-      <h2>Available Vendors</h2>
-      {loading ? (
-        <Loader>Loading...</Loader>
-      ) : (
+     
+      <div>
+        <h2>Available Vendors</h2>
         <VendorListContainer>
-          {vendors.map((vendor) => (
+          {vendors.map(vendor => (
             <VendorCard key={vendor.id} vendor={vendor} />
           ))}
         </VendorListContainer>
-      )}
+        {!reachedEnd && (
+          <Loader style={{ visibility: loading ? "visible" : "hidden" }}>
+            Loading...
+          </Loader>
+        )}
+      </div>
     </div>
   );
 };

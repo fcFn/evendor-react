@@ -1,0 +1,33 @@
+/* VendorCard Hover Effect */
+.vendor-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .vendor-card:hover {
+    transform: scale(1.02);
+    cursor: pointer;
+  }
+  
+  /* Alternate Row Background Color */
+  .vendor-list-container {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(300px, 1fr));
+    gap: 20px;
+    grid-auto-rows: 2fr;
+  }
+  
+  .vendor-list-container .vendor-card:nth-child(odd) {
+    background-color: #f5f5f5;
+  }
+  
+  /* Loader Styling */
+  .loader {
+    text-align: center;
+    margin: 20px;
+    color: #ccc;
+    font-size: 18px;
+  }
+  
