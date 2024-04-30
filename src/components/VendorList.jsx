@@ -83,6 +83,18 @@ const VendorList = () => {
     }
   };
 
+  // Function to handle scroll event
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop ===
+        document.documentElement.offsetHeight &&
+      !loading &&
+      !reachedEnd
+    ) {
+      fetchVendors(); // Fetch more vendors if scroll reaches the bottom
+    }
+  };
+
   // useEffect to fetch vendors on initial render
   useEffect(() => {
     fetchVendors();
@@ -106,18 +118,6 @@ const VendorList = () => {
       document.removeEventListener("scroll", handleScroll);
     };
   }, [handleScroll]); // Include handleScroll in the dependency array
-
-  // Function to handle scroll event
-  const handleScroll = () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop ===
-        document.documentElement.offsetHeight &&
-      !loading &&
-      !reachedEnd
-    ) {
-      fetchVendors(); // Fetch more vendors if scroll reaches the bottom
-    }
-  };
 
   // Function to handle category change
   const handleCategoryChange = (event) => {
