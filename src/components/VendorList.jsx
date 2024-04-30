@@ -56,7 +56,7 @@ const VendorList = () => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        
+
         const data = await response.json();
 
         console.log("Fetched Data:", data); // Log the fetched data
@@ -68,7 +68,7 @@ const VendorList = () => {
           setLoading(false);
           return;
         }
-        
+
         if (data.length === 0) {
           setReachedEnd(true); // If no more vendors to load, set reachedEnd to true
         } else {
@@ -92,7 +92,10 @@ const VendorList = () => {
       document.removeEventListener("scroll", handleScroll);
     };
   }, []); // Empty dependency array to run once on mount
-
+  useEffect(
+    () => fetchVendors(),
+    [selectedCategory, minPrice, maxPrice, minRating, maxRating]
+  );
   // useEffect for infinite scrolling
   useEffect(() => {
     // Add event listener for scroll
@@ -108,7 +111,7 @@ const VendorList = () => {
   const handleScroll = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop ===
-      document.documentElement.offsetHeight &&
+        document.documentElement.offsetHeight &&
       !loading &&
       !reachedEnd
     ) {
