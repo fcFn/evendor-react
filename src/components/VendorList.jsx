@@ -84,7 +84,6 @@ const VendorList = () => {
 
   return (
     <div>
-     
       <div>
         <h2>Available Vendors</h2>
         <VendorListContainer>
